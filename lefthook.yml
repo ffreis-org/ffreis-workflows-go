@@ -16,6 +16,8 @@ pre-commit:
       run: make fmt-check
     secret-scan:
       run: make secrets-scan-staged
+    actionlint:
+      run: command -v actionlint >/dev/null 2>&1 && actionlint || echo "INFO: actionlint not found — skipping. Install from https://github.com/rhysd/actionlint#installation"
 
 pre-push:
   parallel: false

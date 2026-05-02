@@ -30,7 +30,7 @@ on:
         default: false
     secrets:
       SNYK_TOKEN:
-        description: "Snyk API token"
+        description: "Snyk API token (optional; when absent the scan is skipped and an empty SARIF is uploaded)"
         required: false
 
 permissions:

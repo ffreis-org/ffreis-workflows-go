@@ -14,16 +14,16 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
-  # Set Node.js 24 compatibility for all jobs
-  env:
-    FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   gitleaks:
     permissions:
       contents: read
       actions: read
       security-events: write
-    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-gitleaks.yml@b253b2329a11552b6276781c56f6dc6fd1718710
+    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-gitleaks.yml@2c051eb6d9aa5ecea3e969d7e2fd2b4e21a002d6 # v1.0.1
     with:
       working-directory: "."
       scan-history: true
@@ -34,7 +34,7 @@ jobs:
       contents: read
       actions: read
       security-events: write
-    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-scan-trivy-fs.yml@b253b2329a11552b6276781c56f6dc6fd1718710
+    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-scan-trivy-fs.yml@2c051eb6d9aa5ecea3e969d7e2fd2b4e21a002d6 # v1.0.1
     with:
       scan-ref: "."
       upload-sarif: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
@@ -45,7 +45,7 @@ jobs:
       contents: read
       actions: read
       security-events: write
-    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-scan-grype-fs.yml@b253b2329a11552b6276781c56f6dc6fd1718710
+    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-scan-grype-fs.yml@2c051eb6d9aa5ecea3e969d7e2fd2b4e21a002d6 # v1.0.1
     with:
       path: "."
       fail-on-vuln: ${{ github.event_name != 'pull_request' }}
@@ -56,7 +56,7 @@ jobs:
       contents: read
       actions: read
       security-events: write
-    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-osv-scanner.yml@b253b2329a11552b6276781c56f6dc6fd1718710
+    uses: FelipeFuhr/ffreis-workflows-general/.github/workflows/general-osv-scanner.yml@2c051eb6d9aa5ecea3e969d7e2fd2b4e21a002d6 # v1.0.1
     with:
       working-directory: "."
       upload-sarif: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}

@@ -49,3 +49,9 @@ make test               # go test ./... in examples/hello
 
 Consumed by Go repos in the fleet. Callers must pass `working-directory` when their
 Go code is not at the repo root.
+
+## Keeping this file current
+
+- **If you discover a fact not reflected here:** add it before finishing your task.
+- **If something here is wrong or outdated:** correct it in the same commit as the code change.
+- **If you rename a file, command, or concept referenced here:** update the reference.

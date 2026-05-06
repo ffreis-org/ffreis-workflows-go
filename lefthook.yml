@@ -5,7 +5,7 @@ remotes:
       - lefthook/base.yml
       - lefthook/actionlint.yml
 
-# fmt-check targets examples/ only — overrides the go.yml default
+# fmt-check targets examples/ only — repo-local override
 pre-commit:
   commands:
     fmt-check:

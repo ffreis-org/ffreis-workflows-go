@@ -6,7 +6,7 @@ fuzzing, mutation testing, and OSV scanning.
 
 ## Non-obvious rules (read before changing anything)
 
-1. **ALL `go-*.yml` workflows must appear in `self-test.yml`.** No exceptions —
+1. **ALL `go-*.yml` workflows must appear in `ci.yml`.** No exceptions —
    unlike container/python repos, there is no live-infra exemption here.
 
 2. **Shell injection prevention is enforced by Semgrep** (`run-shell-injection` rule).

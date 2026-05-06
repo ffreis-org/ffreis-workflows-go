@@ -9,8 +9,6 @@ permissions:
   actions: read
   packages: write
   security-events: write
-  issues: write
-  pull-requests: write
 
 # Validates that every workflow defined in this library functions correctly
 # against the minimal example app in examples/hello/.

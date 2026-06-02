@@ -18,6 +18,11 @@ on:
         required: false
         type: boolean
         default: false
+      run_on_draft:
+        description: "Run even on draft PRs (default: skip on draft to save CI minutes)"
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   osv-scan:

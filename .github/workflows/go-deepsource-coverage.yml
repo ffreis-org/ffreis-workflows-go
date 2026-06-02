@@ -11,6 +11,11 @@ on:
         description: "Directory containing the Go module"
         type: string
         default: "."
+      run_on_draft:
+        description: "Run even on draft PRs (default: skip on draft to save CI minutes)"
+        required: false
+        type: boolean
+        default: false
     secrets:
       DEEPSOURCE_DSN:
         required: true

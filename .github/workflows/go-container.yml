@@ -44,7 +44,11 @@ on:
 
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # Distinct group (literal "container" infix) so this reusable workflow never
+  # matches a caller's ${{ github.workflow }}-${{ github.ref }} group. When
+  # invoked via workflow_call, github.workflow resolves to the CALLER's name, so
+  # an identical group would deadlock the run.
+  group: ${{ github.workflow }}-container-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:

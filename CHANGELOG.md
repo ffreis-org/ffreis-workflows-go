@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.1](https://github.com/FelipeFuhr/ffreis-workflows-go/compare/v1.1.0...v1.1.1) (2026-06-06)
+
+
+### Bug Fixes
+
+* **ci:** unique concurrency group in go-container reusable to avoid caller deadlock ([#57](https://github.com/FelipeFuhr/ffreis-workflows-go/issues/57)) ([8bbaa46](https://github.com/FelipeFuhr/ffreis-workflows-go/commit/8bbaa4626e530794be5b5aaf2d8f816d6bff20e2))
+* **grype:** bump workflows-general SHA to prevent self-scan CVEs ([#53](https://github.com/FelipeFuhr/ffreis-workflows-go/issues/53)) ([124cd83](https://github.com/FelipeFuhr/ffreis-workflows-go/commit/124cd834ca0cbb9a4257ad20e7c6c35e0ea53d5e))
+
 ## [1.1.0](https://github.com/FelipeFuhr/ffreis-workflows-go/compare/v1.0.0...v1.1.0) (2026-05-23)
 
 

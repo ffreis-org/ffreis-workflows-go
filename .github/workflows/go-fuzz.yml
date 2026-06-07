@@ -144,5 +144,5 @@ jobs:
           name: fuzz-crashers
           path: |
             ${{ inputs.working-directory }}/**/testdata/fuzz/**/
-          retention-days: 30
+          retention-days: 14
           if-no-files-found: ignore

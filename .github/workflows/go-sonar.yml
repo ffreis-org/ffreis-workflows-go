@@ -115,7 +115,8 @@ jobs:
             PROJECT_KEY="$(grep -E '^sonar\\.projectKey=' sonar-project.properties | head -n 1 | cut -d= -f2- || true)"
           fi
           if [[ -z "$PROJECT_KEY" ]]; then
-            PROJECT_KEY="${OWNER}_${REPO}"
+            OWNER_LOWER="$(printf '%s' "$OWNER" | tr '[:upper:]' '[:lower:]')"
+            PROJECT_KEY="${OWNER_LOWER}_${REPO}"
           fi
 
           ORGANIZATION="${ORGANIZATION_INPUT:-}"

@@ -112,7 +112,7 @@ jobs:
             PROJECT_KEY="${PROJECT_KEY_VAR:-}"
           fi
           if [[ -z "$PROJECT_KEY" && -f sonar-project.properties ]]; then
-            PROJECT_KEY="$(grep -E '^sonar\\.projectKey=' sonar-project.properties | head -n 1 | cut -d= -f2- || true)"
+            PROJECT_KEY="$(grep -E '^sonar[.]projectKey=' sonar-project.properties | head -n 1 | cut -d= -f2- || true)"
           fi
           if [[ -z "$PROJECT_KEY" ]]; then
             OWNER_LOWER="$(printf '%s' "$OWNER" | tr '[:upper:]' '[:lower:]')"
@@ -124,7 +124,7 @@ jobs:
             ORGANIZATION="${ORGANIZATION_VAR:-}"
           fi
           if [[ -z "$ORGANIZATION" && -f sonar-project.properties ]]; then
-            ORGANIZATION="$(grep -E '^sonar\\.organization=' sonar-project.properties | head -n 1 | cut -d= -f2- || true)"
+            ORGANIZATION="$(grep -E '^sonar[.]organization=' sonar-project.properties | head -n 1 | cut -d= -f2- || true)"
           fi
           if [[ -z "$ORGANIZATION" ]]; then
             ORGANIZATION="$OWNER"

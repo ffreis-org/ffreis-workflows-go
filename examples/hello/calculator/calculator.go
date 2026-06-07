@@ -10,6 +10,9 @@ import (
 // Add returns the sum of a and b.
 func Add(a, b float64) float64 { return a + b }
 
+// Mod returns the remainder of a divided by b.
+func Mod(a, b float64) float64 { return float64(int64(a) % int64(b)) }
+
 // Sub returns the difference of a and b.
 func Sub(a, b float64) float64 { return a - b }
 

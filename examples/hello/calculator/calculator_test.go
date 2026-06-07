@@ -31,6 +31,15 @@ func TestDivOk(t *testing.T) {
 	}
 }
 
+func TestMod(t *testing.T) {
+	if got := calculator.Mod(10, 3); got != 1 {
+		t.Fatalf("Mod(10,3) = %v, want 1", got)
+	}
+	if got := calculator.Mod(9, 3); got != 0 {
+		t.Fatalf("Mod(9,3) = %v, want 0", got)
+	}
+}
+
 func TestDivByZero(t *testing.T) {
 	_, err := calculator.Div(1, 0)
 	if err == nil {

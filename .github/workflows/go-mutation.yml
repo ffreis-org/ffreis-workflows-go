@@ -34,10 +34,10 @@ on:
         type: number
         default: 60
       gremlins-version:
-        description: 'gremlins version tag to install, e.g. "v0.5.0". Defaults to latest.'
+        description: 'gremlins version tag to install, e.g. "v0.5.0".'
         required: false
         type: string
-        default: 'latest'
+        default: 'v0.6.0'
       run_on_draft:
         description: "Run even on draft PRs (default: skip on draft to save CI minutes)"
         required: false
@@ -91,11 +91,7 @@ jobs:
           GREMLINS_VERSION: ${{ inputs.gremlins-version }}
         run: |
           set -euo pipefail
-          if [ "$GREMLINS_VERSION" = "latest" ]; then
-            go install github.com/go-gremlins/gremlins/cmd/gremlins@latest
-          else
-            go install github.com/go-gremlins/gremlins/cmd/gremlins@"$GREMLINS_VERSION"
-          fi
+          go install github.com/go-gremlins/gremlins/cmd/gremlins@"$GREMLINS_VERSION"
 
       - name: Run mutation testing
         id: run

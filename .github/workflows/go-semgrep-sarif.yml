@@ -51,7 +51,7 @@ jobs:
       - name: Install semgrep
         env:
           SEMGREP_VERSION: ${{ inputs.semgrep-version }}
-        run: pip install "semgrep==$SEMGREP_VERSION"
+        run: pip install "--only-binary=:all:" "semgrep==$SEMGREP_VERSION"
 
       - name: Run semgrep
         env:

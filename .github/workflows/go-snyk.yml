@@ -73,7 +73,7 @@ jobs:
       - name: Install Snyk
         env:
           SNYK_VERSION: ${{ inputs.snyk-version }}
-        run: npm install -g "snyk@$SNYK_VERSION"
+        run: npm install -g --ignore-scripts "snyk@$SNYK_VERSION"
 
       - name: Snyk OSS Test (Go)
         env:

@@ -54,6 +54,14 @@ jobs:
     with:
       working-directory: examples/hello
 
+  quick-checks:
+    permissions:
+      contents: read
+      pull-requests: read
+    uses: ./.github/workflows/go-quick-checks.yml
+    with:
+      working-directory: examples/hello
+
   build:
     permissions:
       contents: read

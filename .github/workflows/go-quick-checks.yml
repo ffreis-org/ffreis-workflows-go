@@ -1,0 +1,140 @@
+name: Go Quick Checks
+
+# Consolidated fast Go checks. Runs gofmt, go vet + golangci-lint, and
+# `go mod tidy` drift as sequential STEPS in ONE job sharing a single checkout
+# and a single Go-toolchain setup, instead of three separate caller jobs
+# (go-fmt + go-lint + go-mod-tidy-check).
+#
+# GitHub bills every job rounded up to a whole minute and each job pays its own
+# ~30-60s of runner + toolchain setup, so collapsing 3 jobs -> 1 cuts roughly
+# 2-3 billed minutes per call with NO loss of coverage: every check still runs
+# and every failure is still reported by name. Each check captures its own exit
+# code via continue-on-error; the final Evaluate step fails the job (once) when
+# any check failed, naming exactly which one.
+#
+# Heavy/independent jobs (test, integration, coverage, build, security scanners)
+# are intentionally NOT folded in — they stay separate so they parallelize and
+# fail independently.
+
+on:
+  workflow_call:
+    inputs:
+      go-version:
+        description: 'Go version (e.g. "1.25")'
+        required: false
+        type: string
+        default: "1.25"
+      golangci-lint-version:
+        description: "golangci-lint version"
+        required: false
+        type: string
+        default: "v2.11.4"
+      working-directory:
+        description: "Directory to run the checks in"
+        required: false
+        type: string
+        default: "."
+      lint-args:
+        description: "Additional args passed to golangci-lint"
+        required: false
+        type: string
+        default: "--timeout=5m"
+      run_on_draft:
+        description: "Run even on draft PRs (default: skip on draft to save CI minutes)"
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  quick-checks:
+    # Draft guard: skip the whole bundle on draft PRs unless explicitly opted in.
+    # Full CI fires on ready_for_review. Matches the per-check guard the folded
+    # workflows used, so behaviour is unchanged on non-draft / push / merge_group.
+    if: ${{ inputs.run_on_draft || vars.CI_RUN_ON_DRAFT == 'true' || github.event_name != 'pull_request' || github.event.pull_request.draft == false }}
+    name: Quick checks (fmt + lint + tidy)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read # for actions/checkout to fetch code
+      pull-requests: read # for golangci-lint-action to fetch pull requests
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
+        with:
+          go-version: ${{ inputs.go-version }}
+          cache: true
+          cache-dependency-path: ${{ inputs.working-directory }}/go.sum
+
+      # --- gofmt -------------------------------------------------------------
+      - name: Check formatting (gofmt)
+        id: fmt
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "::error title=Formatting required::The following files need gofmt:"
+            printf "%s\n" "$unformatted"
+            echo "Fix with: gofmt -w ."
+            exit 1
+          fi
+
+      # --- go vet ------------------------------------------------------------
+      - name: go vet
+        id: vet
+        continue-on-error: true
+        run: go vet ./...
+
+      # --- golangci-lint -----------------------------------------------------
+      - name: golangci-lint
+        id: lint
+        continue-on-error: true
+        uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9.2.0
+        with:
+          version: ${{ inputs.golangci-lint-version }}
+          args: ${{ inputs.lint-args }}
+          working-directory: ${{ inputs.working-directory }}
+
+      # --- go mod tidy drift -------------------------------------------------
+      - name: go mod tidy is clean
+        id: tidy
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          go mod tidy
+          go mod verify
+
+          files=(go.mod)
+          if [ -f go.sum ]; then
+            files+=(go.sum)
+          fi
+
+          git diff --exit-code -- "${files[@]}" || {
+            echo "::error::go.mod/go.sum not tidy — run 'go mod tidy' and commit the result"
+            exit 1
+          }
+
+      # --- Aggregate verdict (single fail point) -----------------------------
+      - name: Evaluate check results
+        env:
+          FMT_OUTCOME: ${{ steps.fmt.outcome }}
+          VET_OUTCOME: ${{ steps.vet.outcome }}
+          LINT_OUTCOME: ${{ steps.lint.outcome }}
+          TIDY_OUTCOME: ${{ steps.tidy.outcome }}
+        run: |
+          set -euo pipefail
+          fail=0
+          [[ "$FMT_OUTCOME"  != "success" ]] && { echo "::error::gofmt check failed (run 'gofmt -w .')."; fail=1; }
+          [[ "$VET_OUTCOME"  != "success" ]] && { echo "::error::go vet failed."; fail=1; }
+          [[ "$LINT_OUTCOME" != "success" ]] && { echo "::error::golangci-lint failed."; fail=1; }
+          [[ "$TIDY_OUTCOME" != "success" ]] && { echo "::error::go.mod/go.sum not tidy."; fail=1; }
+          exit "$fail"

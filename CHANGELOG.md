@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.1.2](https://github.com/FelipeFuhr/ffreis-workflows-go/compare/v1.1.1...v1.1.2) (2026-06-08)
+
+
+### Bug Fixes
+
+* correct sonar project key in examples/hello ([#63](https://github.com/FelipeFuhr/ffreis-workflows-go/issues/63)) ([22e7a90](https://github.com/FelipeFuhr/ffreis-workflows-go/commit/22e7a90bd761691e6831e4a94e3b1c22bb29e7c1))
+* **go-sonar:** correct grep regex + add Mod function with test ([d707b48](https://github.com/FelipeFuhr/ffreis-workflows-go/commit/d707b489cae8f852d64a8c1bb6788a7a098ccac9))
+* normalize SonarCloud project key to lowercase ([#61](https://github.com/FelipeFuhr/ffreis-workflows-go/issues/61)) ([cede25d](https://github.com/FelipeFuhr/ffreis-workflows-go/commit/cede25d081fba2cdb69428680614ce5f5de3d00d))
+* resolve SonarQube issues ([#65](https://github.com/FelipeFuhr/ffreis-workflows-go/issues/65)) ([6547ede](https://github.com/FelipeFuhr/ffreis-workflows-go/commit/6547eded302de0f91b6465b546a6f5d482c54459))
+
 ## [1.1.1](https://github.com/FelipeFuhr/ffreis-workflows-go/compare/v1.1.0...v1.1.1) (2026-06-06)
 
 

@@ -33,6 +33,15 @@ on:
         required: false
         type: boolean
         default: true
+      fresh:
+        description: >
+          Force a fresh test run by adding -count=1 (disables Go's test-result
+          cache). Default false: the cache is ON, so unchanged packages are
+          skipped (Go re-emits their cached coverage). Set true for a scheduled
+          flake-detection run that re-executes every package.
+        required: false
+        type: boolean
+        default: false
       coverage-artifact-name:
         description: 'Name for the uploaded coverage artifact'
         required: false
@@ -78,6 +87,7 @@ jobs:
           TEST_TAGS: ${{ inputs.test-tags }}
           TEST_TIMEOUT: ${{ inputs.test-timeout }}
           EXTRA_TEST_ARGS: ${{ inputs.extra-test-args }}
+          FRESH: ${{ inputs.fresh }}
         run: |
           set -euo pipefail
 
@@ -94,10 +104,18 @@ jobs:
             tag_args+=("-tags" "$TEST_TAGS")
           fi
 
+          # fresh=true → -count=1 forces re-execution (scheduled flake hunt).
+          # fresh=false (default) → omit it so Go's test-result cache skips
+          # unchanged packages; cached coverage is still re-emitted (verified).
+          count_args=()
+          if [ "$FRESH" = "true" ]; then
+            count_args+=("-count=1")
+          fi
+
           go test ./... \
             -v \
             -race \
-            -count=1 \
+            "${count_args[@]+"${count_args[@]}"}" \
             -coverprofile=coverage.out \
             -covermode=atomic \
             -timeout="$TEST_TIMEOUT" \

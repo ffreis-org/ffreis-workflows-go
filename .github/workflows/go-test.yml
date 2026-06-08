@@ -52,6 +52,31 @@ on:
         required: false
         type: boolean
         default: false
+      go-cache-s3:
+        description: >
+          Enable the S3 second-tier (L2) build cache. GitHub Actions cache is L1
+          (free); on an L1 MISS this restores GOMODCACHE+GOCACHE from S3 and saves
+          them back after a green run, so cold/fresh-branch runs warm-start instead
+          of a full module download + recompile. No-op (skipped) on an L1 hit.
+          Requires go-cache-role-arn.
+        required: false
+        type: boolean
+        default: false
+      go-cache-bucket:
+        description: "S3 bucket for the L2 Go build cache"
+        required: false
+        type: string
+        default: ""
+      go-cache-region:
+        description: "AWS region of the L2 cache bucket"
+        required: false
+        type: string
+        default: "us-east-1"
+      go-cache-role-arn:
+        description: "IAM role ARN assumed via OIDC for L2 cache S3 access"
+        required: false
+        type: string
+        default: ""
     outputs:
       coverage-artifact:
         description: 'Name of the uploaded coverage artifact'
@@ -63,6 +88,7 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: read
+      id-token: write # L2 S3 cache OIDC (no-op when go-cache-s3 is false)
     name: Test (race + coverage)
     runs-on: ubuntu-latest
     outputs:
@@ -78,10 +104,34 @@ jobs:
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
+        id: setupgo
         with:
           go-version: ${{ inputs.go-version }}
           cache: true
           cache-dependency-path: ${{ inputs.working-directory }}/go.sum
+
+      # --- L2 (S3) build cache: only engaged on an L1 (GitHub cache) MISS ---
+      - name: AWS credentials (L2 cache)
+        if: ${{ inputs.go-cache-s3 && inputs.go-cache-role-arn != '' && steps.setupgo.outputs.cache-hit != 'true' }}
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
+        with:
+          role-to-assume: ${{ inputs.go-cache-role-arn }}
+          aws-region: ${{ inputs.go-cache-region }}
+
+      - name: Restore Go build cache from S3 (L2, on L1 miss)
+        if: ${{ inputs.go-cache-s3 && inputs.go-cache-role-arn != '' && steps.setupgo.outputs.cache-hit != 'true' }}
+        env:
+          BUCKET: ${{ inputs.go-cache-bucket }}
+        run: |
+          set -euo pipefail
+          [ -f go.sum ] || { echo "::notice::no go.sum — skipping L2 restore"; exit 0; }
+          key="gocache/${GITHUB_REPOSITORY}/$(sha256sum go.sum | cut -c1-32).tar.zst"
+          if aws s3 cp "s3://${BUCKET}/${key}" /tmp/go-l2.tar.zst --no-progress 2>/dev/null; then
+            tar --zstd -xf /tmp/go-l2.tar.zst -C / && echo "::notice::L2 cache hit (${key})"
+          else
+            echo "::notice::L2 cache miss — cold build (${key})"
+          fi
+
       - name: Run tests
         env:
           TEST_TAGS: ${{ inputs.test-tags }}
@@ -136,3 +186,20 @@ jobs:
           go-version-input: ${{ inputs.go-version }}
           check-latest: true
           work-dir: ${{ inputs.working-directory }}
+
+      # Save the warmed GOMODCACHE+GOCACHE to S3 only when L1 missed and the run
+      # is green. S3 PUT (upload) is free; the egress cost is paid only on a
+      # future L1-miss restore, which is rare (GH cache covers the common case).
+      - name: Save Go build cache to S3 (L2)
+        if: ${{ inputs.go-cache-s3 && inputs.go-cache-role-arn != '' && steps.setupgo.outputs.cache-hit != 'true' && success() }}
+        env:
+          BUCKET: ${{ inputs.go-cache-bucket }}
+        run: |
+          set -euo pipefail
+          [ -f go.sum ] || { echo "::notice::no go.sum — skipping L2 save"; exit 0; }
+          key="gocache/${GITHUB_REPOSITORY}/$(sha256sum go.sum | cut -c1-32).tar.zst"
+          gomod="$(go env GOMODCACHE)"
+          gobuild="$(go env GOCACHE)"
+          tar --zstd -cf /tmp/go-l2.tar.zst -C / "${gomod#/}" "${gobuild#/}"
+          aws s3 cp /tmp/go-l2.tar.zst "s3://${BUCKET}/${key}" --no-progress
+          echo "::notice::L2 cache saved (${key}, $(du -h /tmp/go-l2.tar.zst | cut -f1))"

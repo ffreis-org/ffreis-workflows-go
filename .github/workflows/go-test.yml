@@ -57,6 +57,8 @@ on:
         description: 'Name of the uploaded coverage artifact'
         value: ${{ jobs.test.outputs.artifact-name }}
 
+permissions: {}
+
 jobs:
   test:
     if: ${{ inputs.run_on_draft || vars.CI_RUN_ON_DRAFT == 'true' || github.event_name != 'pull_request' || github.event.pull_request.draft == false }}

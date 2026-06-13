@@ -42,6 +42,8 @@ on:
       SONAR_TOKEN:
         required: true
 
+permissions: {}
+
 jobs:
   sonar:
     timeout-minutes: 30

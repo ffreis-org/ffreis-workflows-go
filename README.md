@@ -1,5 +1,9 @@
 # ffreis-workflows-go
 
+<!-- ffreis-badges:start -->
+[![CI](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/FelipeFuhr/ffreis-badges/main/badges/ffreis-workflows-go/ci.json)](https://github.com/FelipeFuhr/ffreis-workflows-go/actions) [![Latest version](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/FelipeFuhr/ffreis-badges/main/badges/ffreis-workflows-go/version.json)](https://github.com/FelipeFuhr/ffreis-workflows-go/releases) [![License](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/FelipeFuhr/ffreis-badges/main/badges/ffreis-workflows-go/license.json)](https://github.com/FelipeFuhr/ffreis-workflows-go/blob/main/LICENSE)
+<!-- ffreis-badges:end -->
+
 Reusable GitHub Actions workflow library for Go projects in the ffreis fleet.
 
 All workflows use `on: workflow_call` and should be consumed from other repositories by pinning to a specific commit SHA.

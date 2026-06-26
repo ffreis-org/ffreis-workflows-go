@@ -19,7 +19,7 @@ common_info() {
 common_die() {
   common_err "$@"
   exit 1
-  # shellcheck disable=SC2317
+  # shellcheck disable=SC2317  # explicit return required by static analysis
   return 1
 }
 

@@ -37,7 +37,7 @@ jobs:
       contents: read  # for actions/checkout to fetch code
       pull-requests: read  # for golangci/golangci-lint-action to fetch pull requests
     name: Lint (vet + golangci-lint)
-    runs-on: ubuntu-latest
+    runs-on: "${{ vars.CI_RUNNER && fromJson(vars.CI_RUNNER) || 'ubuntu-latest' }}"
     defaults:
       run:
         working-directory: ${{ inputs.working-directory }}

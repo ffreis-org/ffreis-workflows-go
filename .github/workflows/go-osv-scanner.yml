@@ -34,7 +34,7 @@ jobs:
       actions: read
       security-events: write
     name: OSV Scanner (Go)
-    runs-on: ubuntu-latest
+    runs-on: "${{ vars.CI_RUNNER && fromJson(vars.CI_RUNNER) || 'ubuntu-latest' }}"
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
 
     defaults:

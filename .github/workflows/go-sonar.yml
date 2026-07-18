@@ -7,7 +7,7 @@ on:
         description: "JSON runner label(s); default GitHub-hosted."
         required: false
         type: string
-        default: '"'"'["ubuntu-latest"]'"'"'
+        default: '["ubuntu-latest"]'
       go-version:
         description: 'Go version'
         required: false

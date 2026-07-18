@@ -3,6 +3,13 @@ name: Go Cross Build (Matrix)
 on:
   workflow_call:
     inputs:
+      runner:
+        description: |
+          JSON-encoded runner label(s). Default: GitHub-hosted ubuntu-latest.
+          Self-hosted homelab box (private repos only): '["self-hosted","local"]'
+        required: false
+        type: string
+        default: '["ubuntu-latest"]'
       go-version:
         description: "Go version"
         type: string
@@ -36,7 +43,7 @@ jobs:
     permissions:
       contents: read
     name: Build matrix
-    runs-on: "${{ vars.CI_RUNNER && fromJson(vars.CI_RUNNER) || 'ubuntu-latest' }}"
+    runs-on: ${{ fromJson(inputs.runner) }}
     outputs:
       goos: ${{ steps.set.outputs.goos }}
       goarch: ${{ steps.set.outputs.goarch }}
@@ -57,7 +64,7 @@ jobs:
           import json
           import os
           import sys
-          
+
           def parse_list(value: str, name: str) -> list[str]:
               v = (value or "").strip()
               if not v:
@@ -75,10 +82,10 @@ jobs:
               if not parts:
                   raise SystemExit(f"{name} has no valid entries")
               return parts
-          
+
           goos = parse_list(os.environ.get("GOOS_INPUT", ""), "inputs.goos")
           goarch = parse_list(os.environ.get("GOARCH_INPUT", ""), "inputs.goarch")
-          
+
           out_path = os.environ.get("GITHUB_OUTPUT")
           if not out_path:
               raise SystemExit("GITHUB_OUTPUT is not set")
@@ -93,7 +100,7 @@ jobs:
       contents: read
     name: Cross build
     needs: [matrix]
-    runs-on: "${{ vars.CI_RUNNER && fromJson(vars.CI_RUNNER) || 'ubuntu-latest' }}"
+    runs-on: ${{ fromJson(inputs.runner) }}
     strategy:
       fail-fast: false
       matrix:

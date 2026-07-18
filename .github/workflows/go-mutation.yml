@@ -13,6 +13,13 @@ name: Go Mutation Testing
 on:
   workflow_call:
     inputs:
+      runner:
+        description: |
+          JSON-encoded runner label(s). Default: GitHub-hosted ubuntu-latest.
+          Self-hosted homelab box (private repos only): '["self-hosted","local"]'
+        required: false
+        type: string
+        default: '["ubuntu-latest"]'
       go-version:
         description: 'Go version to use'
         required: false
@@ -55,7 +62,7 @@ jobs:
     permissions:
       contents: read
     name: Mutation score (gremlins)
-    runs-on: "${{ vars.CI_RUNNER && fromJson(vars.CI_RUNNER) || 'ubuntu-latest' }}"
+    runs-on: ${{ fromJson(inputs.runner) }}
     outputs:
       score: ${{ steps.run.outputs.score }}
     defaults:

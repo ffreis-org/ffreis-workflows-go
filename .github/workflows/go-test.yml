@@ -3,6 +3,13 @@ name: Go Test
 on:
   workflow_call:
     inputs:
+      runner:
+        description: |
+          JSON-encoded runner label(s). Default: GitHub-hosted ubuntu-latest.
+          Self-hosted homelab box (private repos only): '["self-hosted","local"]'
+        required: false
+        type: string
+        default: '["ubuntu-latest"]'
       go-version:
         description: 'Go version'
         required: false
@@ -92,7 +99,7 @@ jobs:
       contents: read
       id-token: write # L2 S3 cache OIDC (no-op when go-cache-s3 is false)
     name: Test (race + coverage)
-    runs-on: "${{ vars.CI_RUNNER && fromJson(vars.CI_RUNNER) || 'ubuntu-latest' }}"
+    runs-on: ${{ fromJson(inputs.runner) }}
     outputs:
       artifact-name: ${{ inputs.coverage-artifact-name }}-${{ github.sha }}
     defaults:

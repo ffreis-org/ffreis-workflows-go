@@ -3,6 +3,13 @@ name: Go Container Build
 on:
   workflow_call:
     inputs:
+      runner:
+        description: |
+          JSON-encoded runner label(s). Default: GitHub-hosted ubuntu-latest.
+          Self-hosted homelab box (private repos only): '["self-hosted","local"]'
+        required: false
+        type: string
+        default: '["ubuntu-latest"]'
       image:
         description: 'Full image name (e.g. ghcr.io/ffreis/my-service)'
         required: true
@@ -59,7 +66,11 @@ jobs:
     permissions:
       contents: read
       packages: write
-    runs-on: "${{ vars.CI_RUNNER && fromJson(vars.CI_RUNNER) || 'ubuntu-latest' }}"
+    # NOTE: the homelab self-hosted runner has neither docker nor podman installed
+    # yet, so routing this job there is not usable until a container runtime is
+    # provisioned (separate, deliberately-deferred decision). Default stays
+    # GitHub-hosted; the input is added now for future-readiness.
+    runs-on: ${{ fromJson(inputs.runner) }}
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450 # v2.19.1

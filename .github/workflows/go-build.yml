@@ -3,6 +3,13 @@ name: Go Build (Validate)
 on:
   workflow_call:
     inputs:
+      runner:
+        description: |
+          JSON-encoded runner label(s). Default: GitHub-hosted ubuntu-latest.
+          Self-hosted homelab box (private repos only): '["self-hosted","local"]'
+        required: false
+        type: string
+        default: '["ubuntu-latest"]'
       go-version:
         description: 'Go version'
         required: false
@@ -26,7 +33,7 @@ jobs:
     permissions:
       contents: read
     name: Build (go vet + go build)
-    runs-on: "${{ vars.CI_RUNNER && fromJson(vars.CI_RUNNER) || 'ubuntu-latest' }}"
+    runs-on: ${{ fromJson(inputs.runner) }}
     defaults:
       run:
         working-directory: ${{ inputs.working-directory }}

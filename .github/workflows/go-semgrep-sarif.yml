@@ -21,7 +21,7 @@ on:
       semgrep-version:
         description: "Semgrep version to install (e.g. 1.99.0)"
         type: string
-        default: "1.99.0"
+        default: "1.170.0"
       upload-sarif:
         description: "Upload SARIF to GitHub code scanning"
         type: boolean
@@ -60,13 +60,14 @@ jobs:
       - name: Install semgrep
         env:
           SEMGREP_VERSION: ${{ inputs.semgrep-version }}
-        run: pip install "--only-binary=:all:" "semgrep==$SEMGREP_VERSION"
+        run: pip install --user "--only-binary=:all:" "semgrep==$SEMGREP_VERSION"
 
       - name: Run semgrep
         env:
           SEMGREP_CONFIG: ${{ inputs.config }}
         run: |
           set -euo pipefail
+          export PATH="$HOME/.local/bin:$PATH"
           semgrep scan --config "$SEMGREP_CONFIG" --sarif --output semgrep.sarif .
           test -s semgrep.sarif
 

@@ -3,6 +3,11 @@ name: Go SonarCloud
 on:
   workflow_call:
     inputs:
+      runner:
+        description: "JSON runner label(s); default GitHub-hosted."
+        required: false
+        type: string
+        default: '"'"'["ubuntu-latest"]'"'"'
       go-version:
         description: 'Go version'
         required: false
@@ -50,7 +55,7 @@ jobs:
     permissions:
       contents: read
     name: SonarCloud
-    runs-on: ${{ fromJson(vars.CI_RUNNER || '["ubuntu-latest"]') }}
+    runs-on: ${{ fromJson(inputs.runner) }}
     if: github.event_name != 'pull_request' || inputs.run-on-pr
     defaults:
       run:

@@ -6,7 +6,6 @@ on:
       runner:
         description: |
           JSON-encoded runner label(s). Default: GitHub-hosted ubuntu-latest.
-          Self-hosted homelab box (private repos only): '["self-hosted","local"]'
         required: false
         type: string
         default: '["ubuntu-latest"]'
@@ -66,7 +65,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    # NOTE: the homelab self-hosted runner has neither docker nor podman installed
     # yet, so routing this job there is not usable until a container runtime is
     # provisioned (separate, deliberately-deferred decision). Default stays
     # GitHub-hosted; the input is added now for future-readiness.
